@@ -15,6 +15,6 @@
         % endfor
       % endif
     % endfor
-    ${request.wrapped_body.decode('utf8')|n}
+    ${request.wrapped_body.decode(request.wrapped_response.charset)|n}
   </body>
 </html>
