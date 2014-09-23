@@ -48,6 +48,29 @@ def unix_username(node, value):  # TODO This is currently not used
 ALPHANUM = re.compile(r'^[a-zA-Z0-9_.-]+$')
 
 
+# Schema fragments
+# ----------------
+# These functions reduce duplication in the schemas defined below,
+# while ensuring some constant values are consistent among those schemas.
+
+def get_email_node(validator=None, description=_("Example: joe@example.com")):
+    return c.SchemaNode(
+        c.String(), title=_('Email'), description=description,
+        validator=validator or c.All(c.Email(), unique_email),
+        widget=w.TextInputWidget(size=40, maxlength=260, type='email'))
+
+
+def get_checked_password_node(description=_("Your password must be harder "
+                              "than a dictionary word or proper name!"), **kw):
+    return c.SchemaNode(
+        c.String(), title=_('Password'), validator=c.Length(min=4),
+        widget=deform.widget.CheckedPasswordWidget(),
+        description=description, **kw)
+
+
+# Schemas
+# -------
+
 class LoginSchema(CSRFSchema):
     username = c.SchemaNode(c.String())
     password = c.SchemaNode(c.String(), validator=c.Length(min=2),
@@ -58,29 +81,13 @@ class RegisterSchema(CSRFSchema):
     username = c.SchemaNode(c.String(), title=_('User name'),
                             description=_("Name with which you will log in"),
                             validator=unique_username)
-    email = c.SchemaNode(
-        c.String(),
-        title=_('Email'),
-        validator=c.All(c.Email(), unique_email),
-        description=_("Example: joe@example.com"),
-        widget=w.TextInputWidget(size=40, maxlength=260, type='email'))
-    password = c.SchemaNode(
-        c.String(),
-        validator=c.Length(min=4),
-        widget=deform.widget.CheckedPasswordWidget(),
-        description=_("Your password must be harder than a "
-                      "dictionary word or proper name!")
-    )
+    email = get_email_node()
+    password = get_checked_password_node()
 
 
 class ForgotPasswordSchema(CSRFSchema):
-    email = c.SchemaNode(
-        c.Str(),
-        title=_('Email'),
+    email = get_email_node(
         validator=c.All(c.Email(), email_exists),
-        # type='email' will render an HTML5 email field
-        # if you use deform_bootstrap_extra:
-        widget=w.TextInputWidget(size=40, maxlength=260, type='email'),
         description=_("The email address under which you have your account. "
                       "Example: joe@example.com"))
 
@@ -90,11 +97,7 @@ class ResetPasswordSchema(CSRFSchema):
         c.String(),
         missing=c.null,
         widget=deform.widget.TextInputWidget(template='readonly/textinput'))
-    password = c.SchemaNode(
-        c.String(),
-        validator=c.Length(min=2),
-        widget=deform.widget.CheckedPasswordWidget()
-    )
+    password = get_checked_password_node()
 
 
 class ProfileSchema(CSRFSchema):
@@ -102,18 +105,11 @@ class ProfileSchema(CSRFSchema):
         c.String(),
         widget=deform.widget.TextInputWidget(template='readonly/textinput'),
         missing=c.null)
-    email = c.SchemaNode(c.String(), validator=c.Email())
-    password = c.SchemaNode(
-        c.String(),
-        validator=c.Length(min=2),
-        widget=deform.widget.CheckedPasswordWidget(), missing=c.null)
+    email = get_email_node(description=None, validator=c.Email())
+    password = get_checked_password_node(missing=c.null)
 
 
 class AdminUserSchema(CSRFSchema):
     username = c.SchemaNode(c.String())
-    email = c.SchemaNode(c.String(), validator=c.Email())
-    password = c.SchemaNode(
-        c.String(),
-        validator=c.Length(min=2),
-        widget=deform.widget.CheckedPasswordWidget(),
-        missing=c.null)
+    email = get_email_node(description=None, validator=c.Email())
+    password = get_checked_password_node(description=None, missing=c.null)
