@@ -246,7 +246,6 @@ class AuthController(BaseController):
                                    errors=[e])
 
             self.request.user = user  # Please keep this line, my app needs it
-
             return authenticated(self.request, user.id_value)
 
     @view_config(permission='view', route_name='logout')
@@ -300,7 +299,7 @@ class ForgotPasswordController(BaseController):
         self.db.add(activation)
         user.activation = activation
         self.db.flush() # initialize activation.code
-        
+
         Str = self.Str
 
         # TODO: Generate msg in a separate method so subclasses can override

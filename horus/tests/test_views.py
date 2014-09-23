@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import (absolute_import, division, print_function,
-    unicode_literals)
+                        unicode_literals)
 from pyramid import testing
 from mock import Mock, patch
 from horus.tests import UnitTestBase
@@ -186,7 +186,7 @@ class TestAuthController(UnitTestBase):
         self.config.registry.settings['horus.logout_redirect'] = 'index'
 
         admin = User(username='sontek', email='sontek@gmail.com')
-        admin.password = 'foo'
+        admin.password = 'min4'
 
         self.session.add(admin)
         self.session.flush()
@@ -199,7 +199,7 @@ class TestAuthController(UnitTestBase):
         request = self.get_csrf_request(post={
                 'submit': True,
                 'username': 'sontek',
-                'password': 'foo',
+                'password': 'min4',
             }, request_method='POST')
 
         view = AuthController(request)
@@ -209,15 +209,12 @@ class TestAuthController(UnitTestBase):
 
     def test_inactive_login_fails(self):
         """Make sure we can't log in with an inactive user."""
-        from horus.tests.models import User
-        from horus.interfaces   import IUserClass
-        from horus.interfaces   import IActivationClass
-        from horus.tests.models import Activation
+        from horus.tests.models import Activation, User
+        from horus.interfaces import IUserClass, IActivationClass
         self.config.registry.registerUtility(Activation, IActivationClass)
-
         self.config.registry.registerUtility(User, IUserClass)
         user = User(username='sontek', email='sontek@gmail.com')
-        user.password = 'foo'
+        user.password = 'min4'
         user.activation = Activation()
         self.session.add(user)
         self.session.flush()
@@ -229,15 +226,16 @@ class TestAuthController(UnitTestBase):
         self.config.registry.settings['horus.logout_redirect'] = 'index'
 
         request = self.get_csrf_request(post={
-                'submit': True,
-                'username': 'sontek',
-                'password': 'foo',
+            'submit': True,
+            'username': 'sontek',
+            'password': 'min4',
             }, request_method='POST')
 
         view = AuthController(request)
         with patch('horus.views.FlashMessage') as FlashMessage:
             view.login()
-            FlashMessage.assert_called_with(request,
+            FlashMessage.assert_called_with(
+                request,
                 'Your account is not active, please check your e-mail.',
                 kind='error')
 
@@ -595,7 +593,7 @@ class TestRegisterController(UnitTestBase):
         self.config.registry.registerUtility(DummyMailer(), IMailer)
 
         user = User(username='sontek', email='sontek2@gmail.com')
-        user.password = 'foo'
+        user.password = 'min4'
         user.activation = Activation()
 
         self.session.add(user)
@@ -637,10 +635,10 @@ class TestRegisterController(UnitTestBase):
 
         user = User(username='sontek', email='sontek@gmail.com')
         user.activation = Activation()
-        user.password = 'foo'
+        user.password = 'min4'
         user1 = User(username='sontek1', email='sontek+2@gmail.com')
         user1.activation = Activation()
-        user1.password = 'foo2'
+        user1.password = 'more'
 
         self.session.add(user)
         self.session.add(user1)
@@ -723,11 +721,11 @@ class TestRegisterController(UnitTestBase):
 
         user = User(username='sontek', email='sontek@gmail.com')
         user.activation = Activation()
-        user.password = 'foo'
+        user.password = 'min4'
 
         user2 = User(username='jessie', email='sontek+2@gmail.com')
         user2.activation = bad_act
-        user2.password = 'foo2'
+        user2.password = 'more'
 
         self.session.add(user)
         self.session.add(user2)
@@ -804,7 +802,7 @@ class TestForgotPasswordController(UnitTestBase):
 
         user = User(username='sontek', password='temp',
             email='sontek@gmail.com')
-        user.password = 'foo'
+        user.password = 'min4'
 
         self.session.add(user)
         self.session.flush()
@@ -838,7 +836,7 @@ class TestForgotPasswordController(UnitTestBase):
 
         user = User(username='sontek', password='temp',
             email='sontek@gmail.com')
-        user.password = 'foo'
+        user.password = 'min4'
 
         self.session.add(user)
         self.session.flush()
@@ -872,7 +870,7 @@ class TestForgotPasswordController(UnitTestBase):
 
         user = User(username='sontek', password='temp',
             email='sontek@gmail.com')
-        user.password = 'foo'
+        user.password = 'min4'
         user.activation = Activation()
 
         self.session.add(user)
@@ -913,7 +911,7 @@ class TestForgotPasswordController(UnitTestBase):
         self.config.registry.registerUtility(DummyMailer(), IMailer)
 
         user = User(username='sontek', email='sontek@gmail.com')
-        user.password = 'foo'
+        user.password = 'min4'
         user.activation = Activation()
 
         self.session.add(user)
@@ -964,7 +962,7 @@ class TestForgotPasswordController(UnitTestBase):
 
         user = User(username='sontek', password='temp',
             email='sontek@gmail.com')
-        user.password = 'foo'
+        user.password = 'min4'
         user.activation = Activation()
 
         self.session.add(user)
@@ -1007,7 +1005,7 @@ class TestForgotPasswordController(UnitTestBase):
 
         user = User(username='sontek', password='temp',
             email='sontek@gmail.com')
-        user.password = 'foo'
+        user.password = 'min4'
         user.activation = Activation()
 
         self.session.add(user)
@@ -1046,7 +1044,7 @@ class TestForgotPasswordController(UnitTestBase):
 
         user = User(username='sontek', password='temp',
             email='sontek@gmail.com')
-        user.password = 'foo'
+        user.password = 'min4'
         user.activation = Activation()
 
         self.session.add(user)
@@ -1243,8 +1241,7 @@ class TestProfileController(UnitTestBase):
             session = request.registry.getUtility(IDBSession)
             session.commit()
 
-        self.config.add_subscriber(handle_profile_updated,
-            ProfileUpdatedEvent)
+        self.config.add_subscriber(handle_profile_updated, ProfileUpdatedEvent)
 
         request = self.get_csrf_request(post={
             'email': 'sontek@gmail.com',

@@ -60,8 +60,9 @@ def get_email_node(validator=None, description=_("Example: joe@example.com")):
         widget=w.TextInputWidget(size=40, maxlength=260, type='email'))
 
 
-def get_checked_password_node(description=_("Your password must be harder "
-                              "than a dictionary word or proper name!"), **kw):
+def get_checked_password_node(description=_(
+        "Your password must be harder than a dictionary word or proper name!"),
+        **kw):
     return c.SchemaNode(
         c.String(), title=_('Password'), validator=c.Length(min=4),
         widget=deform.widget.CheckedPasswordWidget(),
@@ -71,9 +72,17 @@ def get_checked_password_node(description=_("Your password must be harder "
 # Schemas
 # -------
 
-class LoginSchema(CSRFSchema):
+class UsernameLoginSchema(CSRFSchema):
     username = c.SchemaNode(c.String())
-    password = c.SchemaNode(c.String(), validator=c.Length(min=2),
+    password = c.SchemaNode(c.String(), validator=c.Length(min=4),
+                            widget=deform.widget.PasswordWidget())
+LoginSchema = UsernameLoginSchema  # TODO name "LoginSchema" is deprecated.
+
+
+class EmailLoginSchema(CSRFSchema):  # TODO Not currently used
+    '''For login, some applications use email rather than username.'''
+    email = get_email_node()
+    password = c.SchemaNode(c.String(), validator=c.Length(min=4),
                             widget=deform.widget.PasswordWidget())
 
 
