@@ -3,17 +3,16 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 from horus.tests import UnitTestBase
-from horus.schemas import LoginSchema
+from horus.schemas import LoginSchema, UsernameRegisterSchema
 from colander import Invalid
 
 
-class TestModels(UnitTestBase):
+class TestSchemas(UnitTestBase):
     def test_valid_login_schema(self):
         request = self.get_csrf_request(post={
             'handle': 'sontek',
             'password': 'password',
             })
-
         schema = LoginSchema().bind(request=request)
 
         result = schema.deserialize(request.POST)
@@ -37,3 +36,19 @@ class TestModels(UnitTestBase):
                     assert child.msg == 'Required'
                 raise
         self.assertRaises(Invalid, deserialize_empty)
+
+    def test_usernames_may_not_contain_at(self):
+        POST = dict(username='bru@haha', email='bru@haha.com', password='pass')
+        request = self.get_csrf_request(post=POST)
+        schema = UsernameRegisterSchema().bind(request=request)
+
+        def run():
+            try:
+                schema.deserialize(POST)
+            except Invalid as exc:
+                assert len(exc.children) == 1
+                the_error = exc.children[0]
+                assert the_error.node.name == 'username'
+                assert the_error.msg == ['May not contain this character: @']
+                raise
+        self.assertRaises(Invalid, run)

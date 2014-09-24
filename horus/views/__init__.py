@@ -168,14 +168,14 @@ class AuthController(BaseController):
         )
         self.form = form(self.schema, buttons=(self.Str.login_button,))
 
-    def check_credentials(self, username, password):
-        allow_email_auth = self.settings.get('horus.allow_email_auth', False)
-
-        user = self.User.get_user(self.request, username, password)
-
-        if allow_email_auth and not user:
+    def check_credentials(self, handle, password):
+        handle_config = self.request.registry.settings.get('horus.handle',
+                                                           'username')
+        if handle_config == 'email':
             user = self.User.get_by_email_password(
-                self.request, username, password)
+                self.request, handle, password)
+        else:  # ``handle`` could be an email or a username
+            user = self.User.get_if_valid(self.request, handle, password)
 
         if not user:
             raise AuthenticationFailure(_('Invalid username or password.'))

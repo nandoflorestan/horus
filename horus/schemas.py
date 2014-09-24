@@ -48,10 +48,31 @@ def unix_username(node, value):  # TODO This is currently not used
 ALPHANUM = re.compile(r'^[a-zA-Z0-9_.-]+$')
 
 
+def username_does_not_contain_at(node, value):
+    '''Colander validator that ensures the username does not contain an
+    ``@`` character.
+
+    This is important because the system can be configured to accept
+    an email or a username in the same field at login time, so the
+    presence or absence of the @ tells us whether it is an email address.
+    '''
+    if '@' in value:
+        raise c.Invalid(node, _("May not contain this character: @"))
+
+
 # Schema fragments
 # ----------------
 # These functions reduce duplication in the schemas defined below,
 # while ensuring some constant values are consistent among those schemas.
+
+def get_username_creation_node(
+        title=_('User name'), description=_("Name with which you will log in"),
+        validator=None):
+    return c.SchemaNode(
+        c.String(), title=title, description=description,
+        validator=validator or c.All(
+            c.Length(max=30), username_does_not_contain_at, unique_username))
+
 
 def get_email_node(validator=None, description=_("Example: joe@example.com")):
     return c.SchemaNode(
@@ -79,7 +100,7 @@ class UsernameLoginSchema(CSRFSchema):
 LoginSchema = UsernameLoginSchema  # TODO name "LoginSchema" is deprecated.
 
 
-class EmailLoginSchema(CSRFSchema):  # TODO Not currently used
+class EmailLoginSchema(CSRFSchema):
     '''For login, some apps just use email and have no username column.'''
     handle = get_email_node()
     password = c.SchemaNode(c.String(), validator=c.Length(min=4),
@@ -87,15 +108,13 @@ class EmailLoginSchema(CSRFSchema):  # TODO Not currently used
 
 
 class UsernameRegisterSchema(CSRFSchema):
-    username = c.SchemaNode(c.String(), title=_('User name'),
-                            description=_("Name with which you will log in"),
-                            validator=unique_username)
+    username = get_username_creation_node()
     email = get_email_node()
     password = get_checked_password_node()
 RegisterSchema = UsernameRegisterSchema  # TODO The name "RegisterSchema" is deprecated.
 
 
-class EmailRegisterSchema(CSRFSchema):  # TODO Not currently used
+class EmailRegisterSchema(CSRFSchema):
     email = get_email_node()
     password = get_checked_password_node()
 
@@ -109,14 +128,13 @@ class ForgotPasswordSchema(CSRFSchema):
 
 class UsernameResetPasswordSchema(CSRFSchema):
     username = c.SchemaNode(
-        c.String(),
-        missing=c.null,
+        c.String(), missing=c.null,
         widget=deform.widget.TextInputWidget(template='readonly/textinput'))
     password = get_checked_password_node()
 ResetPasswordSchema = UsernameResetPasswordSchema  # TODO deprecated name
 
 
-class EmailResetPasswordSchema(CSRFSchema):  # TODO Not currently used
+class EmailResetPasswordSchema(CSRFSchema):
     email = get_email_node()
     password = get_checked_password_node()
     # Is this really the same code as EmailRegisterSchema?
@@ -132,18 +150,18 @@ class UsernameProfileSchema(CSRFSchema):
 ProfileSchema = UsernameProfileSchema  # TODO deprecated name
 
 
-class EmailProfileSchema(CSRFSchema):  # TODO Not currently used
+class EmailProfileSchema(CSRFSchema):
     email = get_email_node(description=None, validator=c.Email())
     password = get_checked_password_node(missing=c.null)
 
 
 class UsernameAdminUserSchema(CSRFSchema):
-    username = c.SchemaNode(c.String())
+    username = get_username_creation_node(description=None)
     email = get_email_node(description=None, validator=c.Email())
     password = get_checked_password_node(description=None, missing=c.null)
 AdminUserSchema = UsernameAdminUserSchema  # TODO deprecated name
 
 
-class EmailAdminUserSchema(CSRFSchema):  # TODO Not currently used
+class EmailAdminUserSchema(CSRFSchema):
     email = get_email_node(description=None, validator=c.Email())
     password = get_checked_password_node(description=None, missing=c.null)

@@ -322,6 +322,14 @@ class UsernameMixin(UserMixin):
         return cls.validate_user(user, password)
     get_user = get_by_username_password  # override get_user()
 
+    @classmethod
+    def get_if_valid(cls, request, handle, password):
+        '''``handle`` could be username or email.'''
+        if '@' in handle:
+            return cls.get_by_email_password(request, handle, password)
+        else:
+            return cls.get_by_username_password(request, handle, password)
+
 
 class GroupMixin(BaseModel):
     """ base mixin for group object"""

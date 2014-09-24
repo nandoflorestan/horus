@@ -394,20 +394,15 @@ class TestRegisterController(UnitTestBase):
         assert response.status_int == 302
 
     def test_register_creates_user(self):
-        from horus.views import RegisterController
         from pyramid_mailer.mailer import DummyMailer
         from pyramid_mailer.interfaces import IMailer
-        from horus.interfaces           import IUserClass
-        from horus.tests.models         import User
-        from horus.interfaces   import IActivationClass
-        from horus.tests.models import Activation
+        from horus.views import RegisterController
+        from horus.interfaces import IActivationClass, IUserClass
+        from horus.tests.models import Activation, User
         self.config.registry.registerUtility(Activation, IActivationClass)
-
         self.config.registry.registerUtility(User, IUserClass)
-
         self.config.include('horus')
         self.config.registry.registerUtility(DummyMailer(), IMailer)
-
         self.config.add_route('index', '/')
 
         request = self.get_csrf_request(post={
@@ -418,16 +413,13 @@ class TestRegisterController(UnitTestBase):
             },
             'email': 'sontek@gmail.com'
         }, request_method='POST')
-
         request.user = Mock()
         controller = RegisterController(request)
         response = controller.register()
 
         assert response.status_int == 302
-
         user = User.get_by_username(request, 'admin')
-
-        assert user != None
+        assert user is not None
 
     def test_register_validation(self):
         from horus.views                import RegisterController
