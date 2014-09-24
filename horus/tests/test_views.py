@@ -88,10 +88,8 @@ class TestAuthController(UnitTestBase):
     def test_login_fails_empty(self):
         """Make sure we can't log in with empty credentials."""
         from horus.views import AuthController
-        from horus.interfaces   import IUserClass
-        from horus.tests.models import User
-        from horus.interfaces   import IActivationClass
-        from horus.tests.models import Activation
+        from horus.interfaces import IUserClass, IActivationClass
+        from horus.tests.models import User, Activation
         self.config.registry.registerUtility(Activation, IActivationClass)
 
         self.config.registry.registerUtility(User, IUserClass)
@@ -110,7 +108,7 @@ class TestAuthController(UnitTestBase):
 
         assert errors[0].node.name == 'csrf_token'
         assert errors[0].msg == 'Required'
-        assert errors[1].node.name == 'username'
+        assert errors[1].node.name == 'handle'
         assert errors[1].msg == 'Required'
         assert errors[2].node.name == 'password'
         assert errors[2].msg == 'Required'
@@ -163,7 +161,7 @@ class TestAuthController(UnitTestBase):
 
         request = self.get_csrf_request(post={
                 'submit': True,
-                'username': 'admin',
+                'handle': 'admin',
                 'password': 'test123',
             }, request_method='POST')
 
@@ -198,7 +196,7 @@ class TestAuthController(UnitTestBase):
 
         request = self.get_csrf_request(post={
                 'submit': True,
-                'username': 'sontek',
+                'handle': 'sontek',
                 'password': 'min4',
             }, request_method='POST')
 
@@ -227,7 +225,7 @@ class TestAuthController(UnitTestBase):
 
         request = self.get_csrf_request(post={
             'submit': True,
-            'username': 'sontek',
+            'handle': 'sontek',
             'password': 'min4',
             }, request_method='POST')
 

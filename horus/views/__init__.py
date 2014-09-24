@@ -49,7 +49,6 @@ LOG = logging.getLogger(__name__)
 
 def get_config_route(request, config_key):
     settings = request.registry.settings
-
     try:
         return request.route_url(settings[config_key])
     except KeyError:
@@ -123,7 +122,6 @@ def validate_form(controls, form):
         #                debug logging, then log that we "ate" the exception
         LOG.debug('Form validation failed', exc_info=True)
         raise FormValidationFailure(form, e)
-
     return captured
 
 
@@ -201,11 +199,11 @@ class AuthController(BaseController):
         except colander.Invalid as e:
             raise HTTPBadRequest({'invalid': e.asdict()})
 
-        username = captured['username']
+        handle = captured['handle']
         password = captured['password']
 
         try:
-            user = self.check_credentials(username, password)
+            user = self.check_credentials(handle, password)
         except AuthenticationFailure as e:
             raise HTTPBadRequest({
                 'status': 'failure',
@@ -229,17 +227,16 @@ class AuthController(BaseController):
 
         elif self.request.method == 'POST':
             controls = self.request.POST.items()
-
             try:
                 captured = validate_form(controls, self.form)
             except FormValidationFailure as e:
                 return e.result(self.request)
 
-            username = captured['username']
+            handle = captured['handle']
             password = captured['password']
 
             try:
-                user = self.check_credentials(username, password)
+                user = self.check_credentials(handle, password)
             except AuthenticationFailure as e:
                 FlashMessage(self.request, str(e), kind='error')
                 return render_form(self.request, self.form, captured,

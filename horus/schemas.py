@@ -73,23 +73,29 @@ def get_checked_password_node(description=_(
 # -------
 
 class UsernameLoginSchema(CSRFSchema):
-    username = c.SchemaNode(c.String())
+    handle = c.SchemaNode(c.String(), title=_('User name'))
     password = c.SchemaNode(c.String(), validator=c.Length(min=4),
                             widget=deform.widget.PasswordWidget())
 LoginSchema = UsernameLoginSchema  # TODO name "LoginSchema" is deprecated.
 
 
 class EmailLoginSchema(CSRFSchema):  # TODO Not currently used
-    '''For login, some applications use email rather than username.'''
-    email = get_email_node()
+    '''For login, some apps just use email and have no username column.'''
+    handle = get_email_node()
     password = c.SchemaNode(c.String(), validator=c.Length(min=4),
                             widget=deform.widget.PasswordWidget())
 
 
-class RegisterSchema(CSRFSchema):
+class UsernameRegisterSchema(CSRFSchema):
     username = c.SchemaNode(c.String(), title=_('User name'),
                             description=_("Name with which you will log in"),
                             validator=unique_username)
+    email = get_email_node()
+    password = get_checked_password_node()
+RegisterSchema = UsernameRegisterSchema  # TODO The name "RegisterSchema" is deprecated.
+
+
+class EmailRegisterSchema(CSRFSchema):  # TODO Not currently used
     email = get_email_node()
     password = get_checked_password_node()
 
@@ -101,24 +107,43 @@ class ForgotPasswordSchema(CSRFSchema):
                       "Example: joe@example.com"))
 
 
-class ResetPasswordSchema(CSRFSchema):
+class UsernameResetPasswordSchema(CSRFSchema):
     username = c.SchemaNode(
         c.String(),
         missing=c.null,
         widget=deform.widget.TextInputWidget(template='readonly/textinput'))
     password = get_checked_password_node()
+ResetPasswordSchema = UsernameResetPasswordSchema  # TODO deprecated name
 
 
-class ProfileSchema(CSRFSchema):
+class EmailResetPasswordSchema(CSRFSchema):  # TODO Not currently used
+    email = get_email_node()
+    password = get_checked_password_node()
+    # Is this really the same code as EmailRegisterSchema?
+
+
+class UsernameProfileSchema(CSRFSchema):
     username = c.SchemaNode(
         c.String(),
         widget=deform.widget.TextInputWidget(template='readonly/textinput'),
         missing=c.null)
     email = get_email_node(description=None, validator=c.Email())
     password = get_checked_password_node(missing=c.null)
+ProfileSchema = UsernameProfileSchema  # TODO deprecated name
 
 
-class AdminUserSchema(CSRFSchema):
+class EmailProfileSchema(CSRFSchema):  # TODO Not currently used
+    email = get_email_node(description=None, validator=c.Email())
+    password = get_checked_password_node(missing=c.null)
+
+
+class UsernameAdminUserSchema(CSRFSchema):
     username = c.SchemaNode(c.String())
+    email = get_email_node(description=None, validator=c.Email())
+    password = get_checked_password_node(description=None, missing=c.null)
+AdminUserSchema = UsernameAdminUserSchema  # TODO deprecated name
+
+
+class EmailAdminUserSchema(CSRFSchema):  # TODO Not currently used
     email = get_email_node(description=None, validator=c.Email())
     password = get_checked_password_node(description=None, missing=c.null)

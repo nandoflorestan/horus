@@ -247,52 +247,40 @@ class UserMixin(BaseModel):
     @classmethod
     def get_by_email(cls, request, email):
         session = get_session(request)
-
         return session.query(cls).filter(
             func.lower(cls.email) == email.lower()
         ).first()
 
     @classmethod
-    def get_by_email_password(cls, request, email, password):
-        user = cls.get_by_email(request, email)
-
-        if user:
-            valid = cls.validate_user(user, password)
-
-            if valid:
-                return user
-
-    @classmethod
     def get_by_activation(cls, request, activation):
         session = get_session(request)
-
-        user = session.query(cls).filter(
+        return session.query(cls).filter(
             cls.activation_id == activation.id_value
         ).first()
-
-        return user
 
     @classmethod
     def get_by_security_code(cls, request, security_code):
         session = get_session(request)
-
-        user = session.query(cls).filter(
+        return session.query(cls).filter(
             cls.security_code == security_code
         ).first()
 
-        return user
+    @classmethod
+    def get_by_email_password(cls, request, email, password):
+        '''Only returns the user object if the password is correct.'''
+        user = cls.get_by_email(request, email)
+        return cls.validate_user(user, password)
+    get_user = get_by_email_password
 
     @classmethod
     def validate_user(cls, user, password):
+        '''Checks the password and returns the user object.'''
         if not user:
             return None
-
         if user.password is None:
-            valid = False
-        else:
-            valid = crypt.check(user.password, password + user.salt)
-
-        return valid
+            return False
+        if crypt.check(user.password, password + user.salt):
+            return user
 
     def __repr__(self):
         return '<User: %s>' % self.email
@@ -304,8 +292,8 @@ class UserMixin(BaseModel):
         ]
 
 
-class UsernameMixin(object):
-    # username = sa.Column(sa.Unicode(30), nullable=False, unique=True)
+class UsernameMixin(UserMixin):
+    '''Additional username column for sites that need it.'''
     @declared_attr
     def username(self):
         return sa.Column(sa.Unicode(30), nullable=False, unique=True)
@@ -328,11 +316,11 @@ class UsernameMixin(object):
         ).first()
 
     @classmethod
-    def get_user(cls, request, username, password):
+    def get_by_username_password(cls, request, username, password):
+        '''Only returns the user object if the password is correct.'''
         user = cls.get_by_username(request, username)
-        valid = cls.validate_user(user, password)
-        if valid:
-            return user
+        return cls.validate_user(user, password)
+    get_user = get_by_username_password  # override get_user()
 
 
 class GroupMixin(BaseModel):

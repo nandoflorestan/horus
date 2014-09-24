@@ -10,10 +10,8 @@ from cgi import escape
 def get_user(request):
     userid = unauthenticated_userid(request)
     user_class = request.registry.queryUtility(IUserClass)
-
     if userid is not None:
         return user_class.get_by_id(request, userid)
-
     return None
 
 
