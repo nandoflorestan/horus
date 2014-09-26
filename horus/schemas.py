@@ -74,11 +74,12 @@ def get_username_creation_node(
             c.Length(max=30), username_does_not_contain_at, unique_username))
 
 
-def get_email_node(validator=None, description=_("Example: joe@example.com")):
+def get_email_node(validator=None, description=None):
     return c.SchemaNode(
         c.String(), title=_('Email'), description=description,
         validator=validator or c.All(c.Email(), unique_email),
-        widget=w.TextInputWidget(size=40, maxlength=260, type='email'))
+        widget=w.TextInputWidget(size=40, maxlength=260, type='email',
+                                 placeholder=_("joe@example.com")))
 
 
 def get_checked_password_node(description=_(
@@ -122,8 +123,7 @@ class EmailRegisterSchema(CSRFSchema):
 class ForgotPasswordSchema(CSRFSchema):
     email = get_email_node(
         validator=c.All(c.Email(), email_exists),
-        description=_("The email address under which you have your account. "
-                      "Example: joe@example.com"))
+        description=_("The email address under which you have your account."))
 
 
 class UsernameResetPasswordSchema(CSRFSchema):
