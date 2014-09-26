@@ -244,8 +244,8 @@ class AuthController(BaseController):
         horus.logout_redirect, which defaults to a view named 'index'.
         """
         self.request.session.invalidate()
-        FlashMessage(self.request, self.Str.logout, kind='success')
         headers = forget(self.request)
+        FlashMessage(self.request, self.Str.logout, kind='success')
         return HTTPFound(location=self.logout_redirect_view, headers=headers)
 
 
@@ -318,38 +318,37 @@ class ForgotPasswordController(BaseController):
         form = form(schema)
 
         code = self.request.matchdict.get('code', None)
-
         activation = self.Activation.get_by_code(self.request, code)
+        if not activation:
+            return HTTPNotFound()
 
-        if activation:
-            user = self.User.get_by_activation(self.request, activation)
+        user = self.User.get_by_activation(self.request, activation)
 
-            if user:
-                if self.request.method == 'GET':
-                    appstruct = {'username': user.username}
-                    return render_form(self.request, form, appstruct)
+        if user:
+            if self.request.method == 'GET':
+                appstruct = {'username': user.username} if hasattr(
+                    user, 'username') else {'email': user.email}
+                return render_form(self.request, form, appstruct)
 
-                elif self.request.method == 'POST':
-                    controls = self.request.POST.items()
+            elif self.request.method == 'POST':
+                controls = self.request.POST.items()
+                try:
+                    captured = validate_form(controls, form)
+                except FormValidationFailure as e:
+                    return e.result(self.request)
 
-                    try:
-                        captured = validate_form(controls, form)
-                    except FormValidationFailure as e:
-                        return e.result(self.request)
+                password = captured['password']
 
-                    password = captured['password']
+                user.password = password
+                self.db.add(user)
+                self.db.delete(activation)
 
-                    user.password = password
-                    self.db.add(user)
-                    self.db.delete(activation)
-
-                    FlashMessage(self.request, self.Str.reset_password_done,
-                                 kind='success')
-                    self.request.registry.notify(PasswordResetEvent(
-                        self.request, user, password))
-                    location = self.reset_password_redirect_view
-                    return HTTPFound(location=location)
-        return HTTPNotFound()
+                FlashMessage(self.request, self.Str.reset_password_done,
+                             kind='success')
+                self.request.registry.notify(PasswordResetEvent(
+                    self.request, user, password))
+                location = self.reset_password_redirect_view
+                return HTTPFound(location=location)
 
 
 class RegisterController(BaseController):

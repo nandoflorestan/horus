@@ -126,14 +126,16 @@ class ForgotPasswordSchema(CSRFSchema):
 
 class UsernameResetPasswordSchema(CSRFSchema):
     username = c.SchemaNode(
-        c.String(), missing=c.null,
+        c.String(), title=_('User name'), missing=c.null,
         widget=deform.widget.TextInputWidget(template='readonly/textinput'))
     password = get_checked_password_node()
 ResetPasswordSchema = UsernameResetPasswordSchema  # TODO deprecated name
 
 
 class EmailResetPasswordSchema(CSRFSchema):
-    email = get_email_node()
+    email = c.SchemaNode(
+        c.String(), title=_('Email'), missing=c.null,
+        widget=deform.widget.TextInputWidget(template='readonly/textinput'))
     password = get_checked_password_node()
     # Is this really the same code as EmailRegisterSchema?
 
