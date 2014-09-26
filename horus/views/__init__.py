@@ -429,23 +429,23 @@ class RegisterController(BaseController):
         user_id = self.request.matchdict.get('user_id', None)
 
         activation = self.Activation.get_by_code(self.request, code)
+        if not activation:
+            return HTTPNotFound()
 
-        if activation:
-            user = self.User.get_by_id(self.request, user_id)
+        user = self.User.get_by_id(self.request, user_id)
+        if not user:
+            return HTTPNotFound()
 
-            if user.activation != activation:
-                return HTTPNotFound()
+        if user.activation is not activation:
+            return HTTPNotFound()
 
-            if user:
-                self.db.delete(activation)
-                # self.db.add(user)  # not necessary
-                self.db.flush()
-                FlashMessage(self.request, self.Str.activation_email_verified,
-                             kind='success')
-                self.request.registry.notify(
-                    RegistrationActivatedEvent(self.request, user, activation))
-                return HTTPFound(location=self.after_activate_url)
-        return HTTPNotFound()
+        self.db.delete(activation)
+        FlashMessage(self.request, self.Str.activation_email_verified,
+                     kind='success')
+        self.request.registry.notify(
+            RegistrationActivatedEvent(self.request, user, activation))
+        # If an exception is raised in an event subscriber, this never runs:
+        return HTTPFound(location=self.after_activate_url)
 
 
 class ProfileController(BaseController):
