@@ -96,16 +96,14 @@ def get_checked_password_node(description=_(
 
 class UsernameLoginSchema(CSRFSchema):
     handle = c.SchemaNode(c.String(), title=_('User name'))
-    password = c.SchemaNode(c.String(), validator=c.Length(min=4),
-                            widget=deform.widget.PasswordWidget())
+    password = c.SchemaNode(c.String(), widget=deform.widget.PasswordWidget())
 LoginSchema = UsernameLoginSchema  # TODO name "LoginSchema" is deprecated.
 
 
 class EmailLoginSchema(CSRFSchema):
     '''For login, some apps just use email and have no username column.'''
     handle = get_email_node()
-    password = c.SchemaNode(c.String(), validator=c.Length(min=4),
-                            widget=deform.widget.PasswordWidget())
+    password = c.SchemaNode(c.String(), widget=deform.widget.PasswordWidget())
 
 
 class UsernameRegisterSchema(CSRFSchema):
