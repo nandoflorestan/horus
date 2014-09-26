@@ -9,6 +9,7 @@ from horus.models import (ActivationMixin, BaseModel, GroupMixin,
 Base = declarative_base(cls=BaseModel)
 
 
+# Inherit from NoUsernameMixin instead if you do not want a username field.
 class User(UsernameMixin, Base):
     pass
 

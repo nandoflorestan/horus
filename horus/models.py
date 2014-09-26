@@ -146,7 +146,7 @@ def default_security_code():
     return generate_random_string(12)
 
 
-class UserMixin(BaseModel):
+class NoUsernameMixin(BaseModel):
     @declared_attr
     def email(self):
         """ E-mail for user """
@@ -266,11 +266,11 @@ class UserMixin(BaseModel):
         ).first()
 
     @classmethod
-    def get_by_email_password(cls, request, email, password):
+    def get_by_email_password(cls, request, handle, password):
         '''Only returns the user object if the password is correct.'''
-        user = cls.get_by_email(request, email)
+        user = cls.get_by_email(request, handle)
         return cls.validate_user(user, password)
-    get_user = get_by_email_password
+    get_user = get_by_email_password  # get_user is overridden in UsernameMixin
 
     @classmethod
     def validate_user(cls, user, password):
@@ -292,7 +292,7 @@ class UserMixin(BaseModel):
         ]
 
 
-class UsernameMixin(UserMixin):
+class UsernameMixin(NoUsernameMixin):
     '''Additional username column for sites that need it.'''
     @declared_attr
     def username(self):
@@ -320,15 +320,18 @@ class UsernameMixin(UserMixin):
         '''Only returns the user object if the password is correct.'''
         user = cls.get_by_username(request, username)
         return cls.validate_user(user, password)
-    get_user = get_by_username_password  # override get_user()
 
     @classmethod
-    def get_if_valid(cls, request, handle, password):
-        '''``handle`` could be username or email.'''
+    def get_user(cls, request, handle, password):
+        '''We override this method because ``handle`` could be a
+        username or an email.
+        '''
         if '@' in handle:
             return cls.get_by_email_password(request, handle, password)
         else:
             return cls.get_by_username_password(request, handle, password)
+
+UserMixin = UsernameMixin  # The "UserMixin" name is kept for backwards compat
 
 
 class GroupMixin(BaseModel):
@@ -383,10 +386,8 @@ class UserGroupMixin(BaseModel):
     def user_id(self):
         return sa.Column(
             sa.Integer,
-            sa.ForeignKey('%s.%s' % (UserMixin.__tablename__,
-                                     self._idAttribute),
-                          onupdate='CASCADE',
-                          ondelete='CASCADE'),
+            sa.ForeignKey('user.' + self._idAttribute,
+                          onupdate='CASCADE', ondelete='CASCADE'),
         )
 
     def __repr__(self):
