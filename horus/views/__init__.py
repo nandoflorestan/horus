@@ -461,28 +461,22 @@ class ProfileController(BaseController):
     @view_config(route_name='profile', renderer='horus:templates/profile.mako')
     def profile(self):
         user_id = self.request.matchdict.get('user_id', None)
-
         user = self.User.get_by_id(self.request, user_id)
-
         if not user:
             return HTTPNotFound()
-
         return {'user': user}
 
     @view_config(permission='access_user', route_name='edit_profile',
                  renderer='horus:templates/edit_profile.mako')
     def edit_profile(self):
         user = self.request.context
-
         if not user:
             return HTTPNotFound()
 
         if self.request.method == 'GET':
-            username = user.username
-            email = user.email
-
-            appstruct = {'username': username,
-                         'email': email if email else ''}
+            appstruct = {'email': user.email or ''}
+            if hasattr(user, 'username'):
+                appstruct['username'] = user.username
             return render_form(self.request, self.form, appstruct)
 
         elif self.request.method == 'POST':
@@ -491,33 +485,34 @@ class ProfileController(BaseController):
             try:
                 captured = validate_form(controls, self.form)
             except FormValidationFailure as e:
-                # We pre-populate username
-                return e.result(self.request, username=user.username)
+                if hasattr(user, 'username'):
+                    # We pre-populate username
+                    return e.result(self.request, username=user.username)
+                else:
+                    return e.result(self.request)
 
+            changed = False
             email = captured.get('email', None)
-
             if email:
                 email_user = self.User.get_by_email(self.request, email)
-
-                if email_user:
-                    if email_user.id != user.id:
-                        FlashMessage(self.request,
-                            _('That e-mail is already used.'), kind='error')
-                        return HTTPFound(location=self.request.url)
-
-                user.email = email
+                if email_user and email_user.id != user.id:
+                    FlashMessage(self.request,
+                                 _('That e-mail is already used.'),
+                                 kind='error')
+                    return HTTPFound(location=self.request.url)
+                if email != user.email:
+                    user.email = email
+                    changed = True
 
             password = captured.get('password')
-
             if password:
                 user.password = password
+                changed = True
 
-            FlashMessage(self.request, self.Str.edit_profile_done,
-                         kind='success')
-
-            self.db.add(user)
-
-            self.request.registry.notify(
-                ProfileUpdatedEvent(self.request, user, captured)
-            )
+            if changed:
+                FlashMessage(self.request, self.Str.edit_profile_done,
+                             kind='success')
+                self.request.registry.notify(
+                    ProfileUpdatedEvent(self.request, user, captured)
+                )
             return HTTPFound(location=self.request.url)
