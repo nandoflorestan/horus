@@ -16,28 +16,16 @@ from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 
 from hem.db import get_session
-from horus.interfaces import IUserClass
-from horus.interfaces import IActivationClass
-from horus.interfaces import IUIStrings
-from horus.interfaces import ILoginForm
-from horus.interfaces import ILoginSchema
-from horus.interfaces import IRegisterForm
-from horus.interfaces import IRegisterSchema
-from horus.interfaces import IForgotPasswordForm
-from horus.interfaces import IForgotPasswordSchema
-from horus.interfaces import IResetPasswordForm
-from horus.interfaces import IResetPasswordSchema
-from horus.interfaces import IProfileForm
-from horus.interfaces import IProfileSchema
-from horus.events import NewRegistrationEvent
-from horus.events import RegistrationActivatedEvent
-from horus.events import PasswordResetEvent
-from horus.events import ProfileUpdatedEvent
-from horus.lib import FlashMessage
-from horus.models import _
-from horus.exceptions import AuthenticationFailure
-from horus.exceptions import FormValidationFailure
-from horus.httpexceptions import HTTPBadRequest
+from ..interfaces import (
+    IUserClass, IActivationClass, IUIStrings, ILoginForm, ILoginSchema,
+    IRegisterForm, IRegisterSchema, IForgotPasswordForm, IForgotPasswordSchema,
+    IResetPasswordForm, IResetPasswordSchema, IProfileForm, IProfileSchema)
+from ..events import (NewRegistrationEvent, RegistrationActivatedEvent,
+                      PasswordResetEvent, ProfileUpdatedEvent)
+from ..lib import FlashMessage
+from ..models import _
+from ..exceptions import AuthenticationFailure, FormValidationFailure
+from ..httpexceptions import HTTPBadRequest
 
 import colander
 import deform

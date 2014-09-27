@@ -2,35 +2,23 @@
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-from horus.schemas import (
+import inspect
+from hem.config import get_class_from_config
+from pyramid.events import BeforeRender
+from pyramid.path import DottedNameResolver
+from .schemas import (
     ForgotPasswordSchema, UsernameLoginSchema, UsernameRegisterSchema,
     UsernameResetPasswordSchema, UsernameProfileSchema, EmailLoginSchema,
     EmailRegisterSchema, EmailResetPasswordSchema, EmailProfileSchema)
-from horus.forms import SubmitForm
-from horus.resources import RootFactory
-from horus.interfaces import IUIStrings
-from horus.interfaces import IUserClass
-from horus.interfaces import IActivationClass
-from horus.interfaces import ILoginForm
-from horus.interfaces import ILoginSchema
-from horus.interfaces import IRegisterForm
-from horus.interfaces import IRegisterSchema
-from horus.interfaces import IForgotPasswordForm
-from horus.interfaces import IForgotPasswordSchema
-from horus.interfaces import IResetPasswordForm
-from horus.interfaces import IResetPasswordSchema
-from horus.interfaces import IProfileForm
-from horus.interfaces import IProfileSchema
-from horus.lib import get_user
-from horus.lib import render_flash_messages_from_queues
-from horus import models
-from horus.strings import UIStringsBase
-from pyramid.events import BeforeRender
-from pyramid.path import DottedNameResolver
-
-from hem.config import get_class_from_config
-
-import inspect
+from .forms import SubmitForm
+from .resources import RootFactory
+from .interfaces import (
+    IUIStrings, IUserClass, IActivationClass, ILoginForm, ILoginSchema,
+    IRegisterForm, IRegisterSchema, IForgotPasswordForm, IForgotPasswordSchema,
+    IResetPasswordForm, IResetPasswordSchema, IProfileForm, IProfileSchema)
+from .lib import get_user, render_flash_messages_from_queues
+from . import models
+from .strings import UIStringsBase
 
 
 def groupfinder(userid, request):

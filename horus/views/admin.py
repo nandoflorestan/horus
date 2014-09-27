@@ -5,12 +5,12 @@ from __future__ import (absolute_import, division, print_function,
 import deform
 from pyramid.view import view_config, view_defaults
 from pyramid.httpexceptions import HTTPFound
-from horus.interfaces import IUserClass
-from horus.forms import HorusForm
-from horus.lib import FlashMessage
-from horus.resources import RootFactory
-from horus.schemas import EmailAdminUserSchema, UsernameAdminUserSchema
-from horus.views import BaseController
+from ..interfaces import IUserClass
+from ..forms import HorusForm
+from ..lib import FlashMessage
+from ..resources import RootFactory
+from ..schemas import EmailAdminUserSchema, UsernameAdminUserSchema
+from ..views import BaseController
 
 
 @view_defaults(permission='group:admin')

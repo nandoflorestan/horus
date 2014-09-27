@@ -4,20 +4,16 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 from pyramid import testing
 from mock import Mock, patch
-from horus.tests import UnitTestBase
+from . import UnitTestBase
 
 
 class TestAuthController(UnitTestBase):
     def test_auth_controller_extensions(self):
-        from horus.views        import AuthController
-        from horus.interfaces   import IUserClass
-        from horus.interfaces   import ILoginSchema
-        from horus.interfaces   import ILoginForm
-        from horus.interfaces   import IActivationClass
-        from horus.interfaces   import IUIStrings
-        from horus.strings      import UIStringsBase
-        from horus.tests.models import User
-        from horus.tests.models import Activation
+        from ..views import AuthController
+        from ..interfaces import (
+            IUserClass, ILoginSchema, ILoginForm, IActivationClass, IUIStrings)
+        from ..strings import UIStringsBase
+        from .models import User, Activation
 
         self.config.registry.registerUtility(Activation, IActivationClass)
 
@@ -44,11 +40,9 @@ class TestAuthController(UnitTestBase):
         assert form.called
 
     def test_login_loads(self):
-        from horus.views        import AuthController
-        from horus.interfaces   import IUserClass
-        from horus.tests.models import User
-        from horus.interfaces   import IActivationClass
-        from horus.tests.models import Activation
+        from ..views import AuthController
+        from ..interfaces import IUserClass, IActivationClass
+        from .models import User, Activation
         self.config.registry.registerUtility(Activation, IActivationClass)
 
         self.config.registry.registerUtility(User, IUserClass)
@@ -65,11 +59,9 @@ class TestAuthController(UnitTestBase):
         assert response.get('form', None)
 
     def test_login_redirects_if_logged_in(self):
-        from horus.views import AuthController
-        from horus.interfaces   import IUserClass
-        from horus.tests.models import User
-        from horus.interfaces   import IActivationClass
-        from horus.tests.models import Activation
+        from ..views import AuthController
+        from ..interfaces import IUserClass, IActivationClass
+        from .models import User, Activation
         self.config.registry.registerUtility(Activation, IActivationClass)
 
         self.config.registry.registerUtility(User, IUserClass)
@@ -87,9 +79,9 @@ class TestAuthController(UnitTestBase):
 
     def test_login_fails_empty(self):
         """Make sure we can't log in with empty credentials."""
-        from horus.views import AuthController
-        from horus.interfaces import IUserClass, IActivationClass
-        from horus.tests.models import User, Activation
+        from ..views import AuthController
+        from ..interfaces import IUserClass, IActivationClass
+        from .models import User, Activation
         self.config.registry.registerUtility(Activation, IActivationClass)
 
         self.config.registry.registerUtility(User, IUserClass)
@@ -115,11 +107,9 @@ class TestAuthController(UnitTestBase):
 
     def test_csrf_invalid_fails(self):
         """ Make sure we can't login with a bad csrf """
-        from horus.views import AuthController
-        from horus.interfaces   import IUserClass
-        from horus.tests.models import User
-        from horus.interfaces   import IActivationClass
-        from horus.tests.models import Activation
+        from ..views import AuthController
+        from ..interfaces import IUserClass, IActivationClass
+        from .models import User, Activation
         self.config.registry.registerUtility(Activation, IActivationClass)
 
         self.config.registry.registerUtility(User, IUserClass)
@@ -146,11 +136,9 @@ class TestAuthController(UnitTestBase):
 
     def test_login_fails_bad_credentials(self):
         """ Make sure we can't login with bad credentials"""
-        from horus.views import AuthController
-        from horus.interfaces   import IUserClass
-        from horus.tests.models import User
-        from horus.interfaces   import IActivationClass
-        from horus.tests.models import Activation
+        from ..views import AuthController
+        from ..interfaces import IUserClass, IActivationClass
+        from .models import User, Activation
         self.config.registry.registerUtility(Activation, IActivationClass)
 
         self.config.registry.registerUtility(User, IUserClass)
@@ -173,10 +161,8 @@ class TestAuthController(UnitTestBase):
 
     def test_login_succeeds(self):
         """Make sure we can log in."""
-        from horus.tests.models import User
-        from horus.interfaces   import IUserClass
-        from horus.interfaces   import IActivationClass
-        from horus.tests.models import Activation
+        from ..interfaces import IUserClass, IActivationClass
+        from .models import User, Activation
         self.config.registry.registerUtility(Activation, IActivationClass)
 
         self.config.registry.registerUtility(User, IUserClass)
@@ -207,8 +193,8 @@ class TestAuthController(UnitTestBase):
 
     def test_inactive_login_fails(self):
         """Make sure we can't log in with an inactive user."""
-        from horus.tests.models import Activation, User
-        from horus.interfaces import IUserClass, IActivationClass
+        from ..interfaces import IUserClass, IActivationClass
+        from .models import User, Activation
         self.config.registry.registerUtility(Activation, IActivationClass)
         self.config.registry.registerUtility(User, IUserClass)
         user = User(username='sontek', email='sontek@gmail.com')
@@ -238,12 +224,10 @@ class TestAuthController(UnitTestBase):
                 kind='error')
 
     def test_logout(self):
-        from horus.strings      import UIStringsBase as Str
-        from horus.views        import AuthController
-        from horus.tests.models import User
-        from horus.interfaces   import IUserClass
-        from horus.interfaces   import IActivationClass
-        from horus.tests.models import Activation
+        from ..strings import UIStringsBase as Str
+        from ..views import AuthController
+        from ..interfaces import IUserClass, IActivationClass
+        from .models import User, Activation
         self.config.registry.registerUtility(Activation, IActivationClass)
         self.config.registry.registerUtility(User, IUserClass)
         self.config.add_route('index', '/')
