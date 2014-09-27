@@ -97,12 +97,12 @@ def get_checked_password_node(description=_(
 class UsernameLoginSchema(CSRFSchema):
     handle = c.SchemaNode(c.String(), title=_('User name'))
     password = c.SchemaNode(c.String(), widget=deform.widget.PasswordWidget())
-LoginSchema = UsernameLoginSchema  # TODO name "LoginSchema" is deprecated.
+LoginSchema = UsernameLoginSchema  # The name "LoginSchema" is deprecated.
 
 
 class EmailLoginSchema(CSRFSchema):
     '''For login, some apps just use email and have no username column.'''
-    handle = get_email_node()
+    handle = get_email_node(validator=c.Email())
     password = c.SchemaNode(c.String(), widget=deform.widget.PasswordWidget())
 
 
@@ -110,7 +110,7 @@ class UsernameRegisterSchema(CSRFSchema):
     username = get_username_creation_node()
     email = get_email_node()
     password = get_checked_password_node()
-RegisterSchema = UsernameRegisterSchema  # TODO The name "RegisterSchema" is deprecated.
+RegisterSchema = UsernameRegisterSchema  # name "RegisterSchema" is deprecated.
 
 
 class EmailRegisterSchema(CSRFSchema):
@@ -129,7 +129,7 @@ class UsernameResetPasswordSchema(CSRFSchema):
         c.String(), title=_('User name'), missing=c.null,
         widget=deform.widget.TextInputWidget(template='readonly/textinput'))
     password = get_checked_password_node()
-ResetPasswordSchema = UsernameResetPasswordSchema  # TODO deprecated name
+ResetPasswordSchema = UsernameResetPasswordSchema  # deprecated name
 
 
 class EmailResetPasswordSchema(CSRFSchema):
@@ -137,7 +137,6 @@ class EmailResetPasswordSchema(CSRFSchema):
         c.String(), title=_('Email'), missing=c.null,
         widget=deform.widget.TextInputWidget(template='readonly/textinput'))
     password = get_checked_password_node()
-    # Is this really the same code as EmailRegisterSchema?
 
 
 class UsernameProfileSchema(CSRFSchema):
@@ -147,7 +146,7 @@ class UsernameProfileSchema(CSRFSchema):
         missing=c.null)
     email = get_email_node(description=None, validator=c.Email())
     password = get_checked_password_node(missing=c.null)
-ProfileSchema = UsernameProfileSchema  # TODO deprecated name
+ProfileSchema = UsernameProfileSchema  # The name "ProfileSchema" is obsolete.
 
 
 class EmailProfileSchema(CSRFSchema):
@@ -159,7 +158,7 @@ class UsernameAdminUserSchema(CSRFSchema):
     username = get_username_creation_node(description=None)
     email = get_email_node(description=None, validator=c.Email())
     password = get_checked_password_node(description=None, missing=c.null)
-AdminUserSchema = UsernameAdminUserSchema  # TODO deprecated name
+AdminUserSchema = UsernameAdminUserSchema  # deprecated name: AdminUserSchema
 
 
 class EmailAdminUserSchema(CSRFSchema):

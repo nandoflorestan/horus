@@ -3,7 +3,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 from horus.tests import UnitTestBase
-from horus.schemas import LoginSchema, UsernameRegisterSchema
+from horus.schemas import UsernameLoginSchema, UsernameRegisterSchema
 from colander import Invalid
 
 
@@ -13,7 +13,7 @@ class TestSchemas(UnitTestBase):
             'handle': 'sontek',
             'password': 'password',
             })
-        schema = LoginSchema().bind(request=request)
+        schema = UsernameLoginSchema().bind(request=request)
 
         result = schema.deserialize(request.POST)
 
@@ -23,7 +23,7 @@ class TestSchemas(UnitTestBase):
 
     def test_invalid_login_schema(self):
         request = self.get_csrf_request()
-        schema = LoginSchema().bind(request=request)
+        schema = UsernameLoginSchema().bind(request=request)
 
         def deserialize_empty():
             try:
