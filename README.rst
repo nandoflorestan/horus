@@ -127,8 +127,8 @@ It is important that you analyze the characteristics of your web application and
 
 - **email + username**: The user chooses a username when registering and later she can log in by providing either the username or the email address. Therefore, usernames may NOT contain the @ character. **This mode is the default.**
 - **email only**: There is no ``username`` field and users only provide their email address. You enable this mode by:
-  - Making your User model subclass NoUsernameMixin instead of UsernameMixin;
-  - Adding this configuration setting: ``horus.handle = email``, which will make horus default to schemas that contain email fields instead of username fields.
+    - Making your User model subclass NoUsernameMixin instead of UsernameMixin;
+    - Adding this configuration setting: ``horus.handle = email``, which will make horus default to schemas that contain email fields instead of username fields.
 
 If you make this change and want to keep your data you must deal with the existing (or missing) "username" column yourself.
 

@@ -36,7 +36,7 @@ class AdminController(BaseController):
             else:
                 return dict(
                     form=form,
-                    appstruct=self.request.context.__json__()
+                    appstruct=self.request.context.__json__(self.request)
                 )
         else:
             try:
@@ -45,22 +45,16 @@ class AdminController(BaseController):
             except deform.ValidationFailure as e:
                 return dict(form=e, errors=e.error.children)
 
+            del captured['csrf_token']
             if isinstance(self.request.context, RootFactory):
-                user = self.User(
-                    username=captured['username'],
-                    email=captured['email']
-                )
+                user = self.User(**captured)
             else:
                 user = self.request.context
-
             if captured['password']:
                 user.password = captured['password']
-
             self.db.add(user)
-
             FlashMessage(self.request, self.Str.admin_create_user_done,
-                         'success')
-
+                         kind='success')
             return HTTPFound(
                 location=self.request.route_url('admin_users_index')
             )
