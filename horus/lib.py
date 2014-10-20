@@ -37,7 +37,7 @@ def render_flash_messages_from_queues(request):
     for q in QUEUES:
         for m in request.session.pop_flash(q):
             html = m.html if isinstance(m, FlashMessage) \
-                else bootstrap_msg(m, q)
+                else bootstrap_msg(plain=m, kind=q)
             msgs.append(html)
     return ''.join(msgs)
 
