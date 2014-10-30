@@ -17,7 +17,7 @@ def get_user(request):
 
 def render_flash_messages(request):
     msgs = request.session.pop_flash()  # Pops from the empty string queue
-    return ''.join([m.html if isinstance(m, FlashMessage)
+    return ''.join([m.html if hasattr(m, 'html')
                     else bootstrap_msg(m) for m in msgs])
 
 
@@ -36,7 +36,7 @@ def render_flash_messages_from_queues(request):
     msgs = []
     for q in QUEUES:
         for m in request.session.pop_flash(q):
-            html = m.html if isinstance(m, FlashMessage) \
+            html = m.html if hasattr(m, 'html') \
                 else bootstrap_msg(plain=m, kind=q)
             msgs.append(html)
     return ''.join(msgs)
