@@ -44,8 +44,9 @@ def get_config_route(request, config_key):
 
 
 def authenticated(request, userid):
-    """Sets the auth cookies and redirects to the page defined
-    in horus.login_redirect, which defaults to a view named 'index'.
+    """Sets the auth cookies and redirects either to the URL indicated in
+    the "next" parameter, or to the page defined in
+    horus.login_redirect, which defaults to a view named 'index'.
     """
     settings = request.registry.settings
     headers = remember(request, userid)
@@ -55,7 +56,8 @@ def authenticated(request, userid):
         Str = request.registry.getUtility(IUIStrings)
         FlashMessage(request, Str.authenticated, kind='success')
 
-    location = get_config_route(request, 'horus.login_redirect')
+    location = request.params.get('next') or get_config_route(
+        request, 'horus.login_redirect')
 
     return HTTPFound(location=location, headers=headers)
 
